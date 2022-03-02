@@ -1,6 +1,6 @@
 package lectures.part1basics
 
-object CBNvsCBV extends App {
+object e_CBNvsCBV extends App {
 
   def callByValue(x: Long): Unit = {
     println(s"by value: $x")

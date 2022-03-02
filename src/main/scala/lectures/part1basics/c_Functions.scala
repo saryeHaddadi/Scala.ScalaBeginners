@@ -16,6 +16,7 @@ object c_Functions extends App{
   }
   println(aPrepeatedFunction("hello", 3))
 
+
   def aFunctionWithSideEffects(aString: String): Unit = println(aString)
   def aBigFunction(n: Int): Int = {
     def sSmallerFunction(a: Int, b: Int): Int = a + b

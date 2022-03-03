@@ -29,6 +29,8 @@ abstract class MyList[+A] {
   // more HOF
   def foreach(f: (A => Unit)): Unit
   def sort(comparison: ((A, A) => Int)): MyList[A]
+  def zipWith[B, C](list: MyList[B], f: (A, B) => C): MyList[C]
+  def fold[B](initializer: B)(combinationFunction: (B, A) => B): B
 }
 
 case object Empty extends MyList[Nothing] {
@@ -48,6 +50,10 @@ case object Empty extends MyList[Nothing] {
   // more HOF
   def foreach(f: (Nothing => Unit)): Unit = () // () is the Unit value, void
   def sort(comparison: ((Nothing, Nothing) => Int)): MyList[Nothing] = Empty
+  def zipWith[B, C](list: MyList[B], f: (Nothing, B) => C): MyList[C] =
+    if (!list.isEmpty) throw new RuntimeException("List do not have the same length")
+    else Empty
+  def fold[B](initializer: B)(combinationFunction: (B, Nothing) => B): B = initializer
 }
 
 case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
@@ -84,6 +90,12 @@ case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
     insert(h, sortedTail)
   }
 
+  def zipWith[B, C](list: MyList[B], f: (A, B) => C): MyList[C] =
+    if (list.isEmpty) throw new RuntimeException("List do not have the same length")
+    else new Cons(f(h, list.head), t.zipWith(list.tail, f))
+
+  def fold[B](initializer: B)(combinationFunction: (B, A) => B): B =
+    t.fold(combinationFunction(initializer, h))(combinationFunction)
 }
 
 
@@ -114,11 +126,23 @@ object ListTest extends App {
   // More HOF
   listOfInt.foreach(println)
   println(listOfInt.sort((x, y) => y-x))
+  //println(listOfInt.zipWith(anotherListOfInt, _ + " " + _)) // should fail, because not same lenght
+  //println(listOfInt.zipWith[String, String](cloneListOfInt, _ + "-" + _))
+  println(listOfInt.zipWith(cloneListOfInt, _ + "-" + _))
+  println(listOfInt.fold(0)(_ + _))
 
 
+  // for-comprehensions
+  val combinations = for {
+    n <- listOfInt
+    string <- listOfString
+  } yield n + "-"
+  println(combinations)
 
-
-
+  println(for {
+    n <- listOfInt
+    string <- listOfString
+  } yield n + "-")
 
 
 

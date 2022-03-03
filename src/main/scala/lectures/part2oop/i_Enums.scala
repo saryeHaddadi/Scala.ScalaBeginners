@@ -38,7 +38,7 @@ object i_Enums {
   // - the ability to iterate, or get a hold,
   // of all the possible values of an enums
   val allPermissions = PermissionWithBit.values // array of all possible values
-  val readPremission: Permission = Permission("READ") // Permission.READ
+  //val readPremission: Permission = Permission("READ") // Permission.READ
 
   def main(args: Array[String]): Unit = {
     somePermission.openDocument()

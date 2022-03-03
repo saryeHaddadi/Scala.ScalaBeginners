@@ -26,6 +26,9 @@ abstract class MyList[+A] {
   // List concatenation
   def ++[B >: A](list: MyList[B]): MyList[B]
 
+  // more HOF
+  def foreach(f: (A => Unit)): Unit
+  def sort(comparison: ((A, A) => Int)): MyList[A]
 }
 
 case object Empty extends MyList[Nothing] {
@@ -41,6 +44,10 @@ case object Empty extends MyList[Nothing] {
   def filter(predicate: Nothing => Boolean): MyList[Nothing] = Empty
 
   def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
+
+  // more HOF
+  def foreach(f: (Nothing => Unit)): Unit = () // () is the Unit value, void
+  def sort(comparison: ((Nothing, Nothing) => Int)): MyList[Nothing] = Empty
 }
 
 case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
@@ -56,11 +63,27 @@ case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
     if (predicate(h)) new Cons(h, t.filter(predicate))
     else t.filter(predicate)
 
+  // higher-order functions
   def map[B](transformer: A => B): MyList[B] =
     Cons(transformer((h)), t.map((transformer)))
   def flatMap[B](transformer: A => MyList[B]): MyList[B] =
     transformer(h) ++ t.flatMap(transformer)
   def ++[B >: A](list: MyList[B]): MyList[B] = new Cons(h, t ++ list)
+
+  // more HOF
+  def foreach(f: (A => Unit)): Unit =
+    f(h)
+    t.foreach(f)
+
+  def sort(compare: ((A, A) => Int)): MyList[A] = {
+    def insert(x:A, sortedList: MyList[A]): MyList[A] =
+      if (sortedList.isEmpty) new Cons(x, Empty)
+      else if (compare(x, sortedList.head) <= 0) new Cons(x, sortedList)
+      else new Cons(sortedList.head, insert(x, sortedList.tail))
+    val sortedTail = t.sort(compare)
+    insert(h, sortedTail)
+  }
+
 }
 
 
@@ -88,8 +111,9 @@ object ListTest extends App {
   // Case classes
   println(cloneListOfInt == listOfInt)
 
-
-
+  // More HOF
+  listOfInt.foreach(println)
+  println(listOfInt.sort((x, y) => y-x))
 
 
 
